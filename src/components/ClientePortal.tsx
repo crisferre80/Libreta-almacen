@@ -132,43 +132,34 @@ export default function ClientePortal() {
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile && appScheme) {
-      // Intentar abrir la app nativa primero
-      const appUrl = `${appScheme}pay?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
+      // URLs específicas para cada app
+      let appUrl = '';
 
-      // Para Android, usar intent
-      if (/Android/i.test(navigator.userAgent)) {
-        const intentUrl = `intent://${appScheme.replace('://', '')}/pay?amount=${monto}&message=${encodeURIComponent(mensaje)}#Intent;scheme=${appScheme.replace('://', '')};package=${getPackageName(appScheme)};end`;
-        window.location.href = intentUrl;
-
-        // Fallback después de 2 segundos
-        setTimeout(() => {
+      if (appScheme === 'mercadopago') {
+        // Mercado Pago - usar URL universal que abre la app
+        appUrl = `https://www.mercadopago.com.ar/pay?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
+        window.open(appUrl, '_blank');
+      } else if (appScheme === 'naranjax') {
+        // Naranja X - usar la app si está instalada, sino web
+        if (/Android/i.test(navigator.userAgent)) {
+          // Para Android, intentar abrir app primero
+          window.location.href = `intent://naranjax/pay?amount=${monto}#Intent;scheme=naranjax;package=com.naranja.naranjax;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+        } else {
+          // Para iOS y otros, abrir web
           window.open(url, '_blank');
-        }, 2000);
-      } else {
-        // Para iOS, intentar abrir la app
-        window.location.href = appUrl;
-
-        // Fallback después de 2 segundos
-        setTimeout(() => {
-          window.open(url, '_blank');
-        }, 2000);
+        }
+      } else if (appScheme === 'bna') {
+        // Banco Nación - abrir web directamente
+        window.open(url, '_blank');
       }
+
+      setShowPagoModal(false);
     } else {
       // Desktop o sin app scheme: abrir web
       const urlCompleta = `${url}?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
       window.open(urlCompleta, '_blank');
+      setShowPagoModal(false);
     }
-
-    setShowPagoModal(false);
-  }
-
-  function getPackageName(scheme: string): string {
-    const packages: { [key: string]: string } = {
-      'mercadopago://': 'com.mercadopago.wallet',
-      'naranjax://': 'com.naranja.naranjax',
-      'bna://': 'ar.com.bna.bna'
-    };
-    return packages[scheme] || '';
   }
 
   async function cargarTransacciones(clienteSeleccionado: Cliente) {
@@ -402,7 +393,7 @@ export default function ClientePortal() {
 
             <div className="space-y-3">
               <button
-                onClick={() => abrirBilletera('https://www.mercadopago.com.ar', 'mercadopago://')}
+                onClick={() => abrirBilletera('https://www.mercadopago.com.ar', 'mercadopago')}
                 className="w-full flex items-center gap-3 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -412,7 +403,7 @@ export default function ClientePortal() {
               </button>
 
               <button
-                onClick={() => abrirBilletera('https://www.naranjax.com', 'naranjax://')}
+                onClick={() => abrirBilletera('https://www.naranjax.com', 'naranjax')}
                 className="w-full flex items-center gap-3 p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -422,7 +413,7 @@ export default function ClientePortal() {
               </button>
 
               <button
-                onClick={() => abrirBilletera('https://www.bna.com.ar/Personas', 'bna://')}
+                onClick={() => abrirBilletera('https://www.bna.com.ar/Personas', 'bna')}
                 className="w-full flex items-center gap-3 p-4 bg-blue-800 text-white rounded-lg hover:bg-blue-900 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
