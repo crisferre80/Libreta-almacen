@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'SilentForest';
+  src: url('/assets/Silent Forest.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
