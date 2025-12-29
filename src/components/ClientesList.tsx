@@ -74,6 +74,8 @@ export default function ClientesList() {
       alert('Error al actualizar códigos de acceso.');
     }
   }
+
+  async function loadClientes() {
     if (!comercio) return;
 
     try {
