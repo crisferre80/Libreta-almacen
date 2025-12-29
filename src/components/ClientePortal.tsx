@@ -27,26 +27,9 @@ export default function ClientePortal() {
       // Direct access with code
       loadClienteByCode(code);
     } else {
-      // Normal auth flow
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-          loadClienteData(session.user);
-        }
-      });
-
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-          loadClienteData(session.user);
-        } else {
-          setUser(null);
-          setCliente(null);
-          setStep('auth');
-        }
-      });
-
-      return () => subscription.unsubscribe();
+      // No code provided - show error
+      setAuthError('Acceso denegado. Utiliza el código QR proporcionado por tu comerciante para acceder a tu portal.');
+      setStep('auth');
     }
   }, [code]);
 
@@ -160,6 +143,33 @@ export default function ClientePortal() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  if (step === 'auth' && !code) {
+    // No access code provided
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+          <div className="text-center mb-8">
+            <FileText className="w-12 h-12 text-red-600 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
+            <p className="text-gray-600 mb-4">Para acceder al portal del cliente, necesitas un código de acceso válido proporcionado por tu comerciante.</p>
+          </div>
+
+          {authError && (
+            <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+              {authError}
+            </div>
+          )}
+
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-500">
+              Escanea el código QR que te proporcionó tu comerciante para acceder a tus transacciones.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (step === 'auth') {
