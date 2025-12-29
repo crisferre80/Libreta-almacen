@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ArrowLeft, FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, LogOut } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, LogOut, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Cliente, Transaccion } from '../types';
+import { formatDate } from '../lib/utils';
 import { formatDate } from '../lib/utils';
 import { User } from '@supabase/supabase-js';
 
@@ -22,6 +23,7 @@ export default function ClientePortal() {
   const [showPassword, setShowPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [showPagoModal, setShowPagoModal] = useState(false);
 
   useEffect(() => {
     if (code) {
@@ -116,6 +118,18 @@ export default function ClientePortal() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
+  }
+
+  function handlePagarTransferencia() {
+    setShowPagoModal(true);
+  }
+
+  function abrirBilletera(url: string) {
+    const monto = cliente?.saldo_actual || 0;
+    const mensaje = `Pago de deuda - ${cliente?.nombre}: $${monto.toFixed(2)}`;
+    const urlCompleta = `${url}?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
+    window.open(urlCompleta, '_blank');
+    setShowPagoModal(false);
   }
 
   async function cargarTransacciones(clienteSeleccionado: Cliente) {
@@ -264,6 +278,15 @@ export default function ClientePortal() {
                 ${cliente!.saldo_actual.toFixed(2)}
               </div>
             </div>
+            {cliente!.saldo_actual > 0 && (
+              <button
+                onClick={handlePagarTransferencia}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <CreditCard className="w-4 h-4" />
+                Pagar
+              </button>
+            )}
             <button
               onClick={handleSignOut}
               className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -322,6 +345,65 @@ export default function ClientePortal() {
           </div>
         )}
       </div>
+
+      {/* Modal de pago por transferencia */}
+      {showPagoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <CreditCard className="w-12 h-12 text-green-600 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Pagar por Transferencia</h2>
+              <p className="text-gray-600">Selecciona tu billetera virtual</p>
+              <div className="mt-2 p-3 bg-green-50 rounded-lg">
+                <p className="text-sm text-green-800 font-medium">
+                  Monto a pagar: ${cliente?.saldo_actual.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => abrirBilletera('https://www.mercadopago.com.ar')}
+                className="w-full flex items-center gap-3 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-sm">MP</span>
+                </div>
+                <span className="font-medium">Mercado Pago</span>
+              </button>
+
+              <button
+                onClick={() => abrirBilletera('https://www.naranjax.com')}
+                className="w-full flex items-center gap-3 p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-orange-600 font-bold text-sm">NX</span>
+                </div>
+                <span className="font-medium">Naranja X</span>
+              </button>
+
+              <button
+                onClick={() => abrirBilletera('https://www.bna.com.ar/Personas')}
+                className="w-full flex items-center gap-3 p-4 bg-blue-800 text-white rounded-lg hover:bg-blue-900 transition-colors"
+              >
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-blue-800 font-bold text-sm">BNA</span>
+                </div>
+                <span className="font-medium">Banco Nación</span>
+              </button>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowPagoModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
