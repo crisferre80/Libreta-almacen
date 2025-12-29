@@ -33,7 +33,47 @@ export default function ClientesList() {
     setFilteredClientes(filtered);
   }, [searchTerm, clientes]);
 
-  async function loadClientes() {
+  async function fixAccessCodes() {
+    try {
+      // Get all clients without access_code
+      const { data: clientsWithoutCode, error: fetchError } = await supabase
+        .from('clientes')
+        .select('id')
+        .or('access_code.is.null,activo.is.null')
+        .eq('comercio_id', comercio.id);
+
+      if (fetchError) throw fetchError;
+
+      if (clientsWithoutCode && clientsWithoutCode.length > 0) {
+        // Update each client with access_code and activo=true
+        for (const client of clientsWithoutCode) {
+          const accessCode = crypto.randomUUID();
+          const { error: updateError } = await supabase
+            .from('clientes')
+            .update({
+              access_code: accessCode,
+              activo: true
+            })
+            .eq('id', client.id);
+
+          if (updateError) {
+            console.error('Error updating client:', client.id, updateError);
+          } else {
+            console.log('Updated client:', client.id, 'with access_code:', accessCode);
+          }
+        }
+
+        // Reload clients
+        loadClientes();
+        alert(`Se actualizaron ${clientsWithoutCode.length} clientes con códigos de acceso.`);
+      } else {
+        alert('Todos los clientes ya tienen códigos de acceso válidos.');
+      }
+    } catch (err) {
+      console.error('Error fixing access codes:', err);
+      alert('Error al actualizar códigos de acceso.');
+    }
+  }
     if (!comercio) return;
 
     try {
@@ -197,6 +237,14 @@ export default function ClientesList() {
           >
             <Settings className="w-5 h-5" />
             <span className="text-xs">Perfil</span>
+          </button>
+          <button
+            onClick={fixAccessCodes}
+            className="flex flex-col items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors"
+            title="Reparar códigos de acceso de clientes"
+          >
+            <ExternalLink className="w-5 h-5" />
+            <span className="text-xs">Reparar</span>
           </button>
           <Link
             to="/cliente"
