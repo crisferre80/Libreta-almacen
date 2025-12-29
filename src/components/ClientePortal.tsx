@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Cliente, Transaccion } from '../types';
+import { formatDate } from '../lib/utils';
 import { User } from '@supabase/supabase-js';
 
 export default function ClientePortal() {
@@ -132,17 +133,6 @@ export default function ClientePortal() {
       setError('Error al cargar transacciones');
       console.error(err);
     }
-  }
-
-  function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   }
 
   if (step === 'auth' && !code) {

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AddTransaccion from './AddTransaccion';
 import ImageUpload from './ImageUpload';
 import jsPDF from 'jspdf';
+import { formatDate } from '../lib/utils';
 
 interface ClienteDetalleProps {
   cliente: Cliente;
