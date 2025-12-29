@@ -124,12 +124,51 @@ export default function ClientePortal() {
     setShowPagoModal(true);
   }
 
-  function abrirBilletera(url: string) {
+  function abrirBilletera(url: string, appScheme?: string) {
     const monto = cliente?.saldo_actual || 0;
     const mensaje = `Pago de deuda - ${cliente?.nombre}: $${monto.toFixed(2)}`;
-    const urlCompleta = `${url}?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
-    window.open(urlCompleta, '_blank');
+
+    // Detectar si es dispositivo móvil
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile && appScheme) {
+      // Intentar abrir la app nativa primero
+      const appUrl = `${appScheme}pay?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
+
+      // Para Android, usar intent
+      if (/Android/i.test(navigator.userAgent)) {
+        const intentUrl = `intent://${appScheme.replace('://', '')}/pay?amount=${monto}&message=${encodeURIComponent(mensaje)}#Intent;scheme=${appScheme.replace('://', '')};package=${getPackageName(appScheme)};end`;
+        window.location.href = intentUrl;
+
+        // Fallback después de 2 segundos
+        setTimeout(() => {
+          window.open(url, '_blank');
+        }, 2000);
+      } else {
+        // Para iOS, intentar abrir la app
+        window.location.href = appUrl;
+
+        // Fallback después de 2 segundos
+        setTimeout(() => {
+          window.open(url, '_blank');
+        }, 2000);
+      }
+    } else {
+      // Desktop o sin app scheme: abrir web
+      const urlCompleta = `${url}?amount=${monto}&message=${encodeURIComponent(mensaje)}`;
+      window.open(urlCompleta, '_blank');
+    }
+
     setShowPagoModal(false);
+  }
+
+  function getPackageName(scheme: string): string {
+    const packages: { [key: string]: string } = {
+      'mercadopago://': 'com.mercadopago.wallet',
+      'naranjax://': 'com.naranja.naranjax',
+      'bna://': 'ar.com.bna.bna'
+    };
+    return packages[scheme] || '';
   }
 
   async function cargarTransacciones(clienteSeleccionado: Cliente) {
@@ -363,7 +402,7 @@ export default function ClientePortal() {
 
             <div className="space-y-3">
               <button
-                onClick={() => abrirBilletera('https://www.mercadopago.com.ar')}
+                onClick={() => abrirBilletera('https://www.mercadopago.com.ar', 'mercadopago://')}
                 className="w-full flex items-center gap-3 p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -373,7 +412,7 @@ export default function ClientePortal() {
               </button>
 
               <button
-                onClick={() => abrirBilletera('https://www.naranjax.com')}
+                onClick={() => abrirBilletera('https://www.naranjax.com', 'naranjax://')}
                 className="w-full flex items-center gap-3 p-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -383,7 +422,7 @@ export default function ClientePortal() {
               </button>
 
               <button
-                onClick={() => abrirBilletera('https://www.bna.com.ar/Personas')}
+                onClick={() => abrirBilletera('https://www.bna.com.ar/Personas', 'bna://')}
                 className="w-full flex items-center gap-3 p-4 bg-blue-800 text-white rounded-lg hover:bg-blue-900 transition-colors"
               >
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
