@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ClienteQR from './ClienteQR';
@@ -52,7 +52,7 @@ export default function AddCliente({ onClose, onSuccess }: AddClienteProps) {
       <div className="bg-white rounded-2xl shadow-xl max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto">
         {accessCode ? (
           <div className="p-4">
-            <ClienteQR accessCode={accessCode} clienteNombre={nombre} telefono={telefono} />
+            <ClienteQR accessCode={accessCode} clienteNombre={nombre} telefono={telefono} comercio={comercio!} />
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => {

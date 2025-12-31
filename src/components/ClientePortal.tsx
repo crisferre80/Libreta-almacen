@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ArrowLeft, FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, LogOut, CreditCard } from 'lucide-react';
+import { FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Cliente, Transaccion } from '../types';
-import { formatDate } from '../lib/utils';
 import { formatDate } from '../lib/utils';
 import { User } from '@supabase/supabase-js';
 
 export default function ClientePortal() {
   const { code } = useParams<{ code?: string }>();
-  const [, setUser] = useState<User | null>(null);
+  const [] = useState<User | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [transacciones, setTransacciones] = useState<Transaccion[]>([]);
   const [] = useState(false);
@@ -36,30 +35,6 @@ export default function ClientePortal() {
     }
   }, [code]);
 
-  async function loadClienteData(user: User) {
-    try {
-      // Find client by email
-      const { data: clienteData, error: clienteError } = await supabase
-        .from('clientes')
-        .select('*')
-        .eq('email', user.email)
-        .eq('activo', true)
-        .single();
-
-      if (clienteError || !clienteData) {
-        setAuthError('No se encontró un cliente asociado a esta cuenta.');
-        await supabase.auth.signOut();
-        return;
-      }
-
-      setCliente(clienteData);
-      await cargarTransacciones(clienteData);
-      setStep('view');
-    } catch (err) {
-      setAuthError('Error al cargar datos del cliente');
-      console.error(err);
-    }
-  }
 
   async function loadClienteByCode(accessCode: string) {
     try {
@@ -114,10 +89,6 @@ export default function ClientePortal() {
     } finally {
       setAuthLoading(false);
     }
-  }
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
   }
 
   function handlePagarTransferencia() {
@@ -290,13 +261,6 @@ export default function ClientePortal() {
                 Pagar
               </button>
             )}
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar Sesión
-            </button>
           </div>
         </div>
       </div>

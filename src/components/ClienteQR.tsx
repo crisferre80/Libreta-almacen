@@ -1,21 +1,23 @@
 import QRCode from 'react-qr-code';
 import { MessageCircle } from 'lucide-react';
+import { Comercio } from '../types';
 
 interface ClienteQRProps {
   accessCode: string;
   clienteNombre: string;
   telefono?: string;
+  comercio: Comercio;
 }
 
-export default function ClienteQR({ accessCode, clienteNombre, telefono }: ClienteQRProps) {
-  const url = `${window.location.origin}/cliente/${accessCode}`;
+export default function ClienteQR({ accessCode, clienteNombre, telefono, comercio }: ClienteQRProps) {
+  const url = `https://milibreta.netlify.app/cliente/${accessCode}`;
 
   const enviarWhatsApp = () => {
     if (!telefono) {
       alert('No hay teléfono registrado para este cliente.');
       return;
     }
-    const mensaje = `Hola ${clienteNombre}, aquí tienes el enlace para acceder a tu cuenta: ${url}`;
+    const mensaje = `Hola ${clienteNombre}, ${comercio.nombre_comercio} te invita a acceder a tu cuenta digital: ${url}. Contacto: ${comercio.telefono || 'Sin teléfono'}`;
     const whatsappUrl = `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, '_blank');
   };

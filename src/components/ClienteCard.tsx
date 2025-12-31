@@ -2,6 +2,7 @@ import { User, Phone, AlertTriangle, MessageCircle, Trash2, QrCode } from 'lucid
 import { useState } from 'react';
 import { Cliente } from '../types';
 import ClienteQR from './ClienteQR';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ClienteCardProps {
   cliente: Cliente;
@@ -13,6 +14,7 @@ export default function ClienteCard({ cliente, onClick, onDelete }: ClienteCardP
   const enRiesgo = cliente.saldo_actual >= cliente.limite_credito && cliente.limite_credito > 0;
   const tieneDeuda = cliente.saldo_actual > 0;
   const [showQR, setShowQR] = useState(false);
+  const { comercio } = useAuth();
 
   function generarMensajeWhatsApp() {
     const mensaje = `Hola ${cliente.nombre}, te paso el resumen de tu cuenta al día de hoy: $${cliente.saldo_actual.toFixed(2)}. ¡Saludos!`;
@@ -115,7 +117,7 @@ export default function ClienteCard({ cliente, onClick, onDelete }: ClienteCardP
     {showQR && cliente.access_code ? (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg p-4 max-w-sm w-full">
-          <ClienteQR accessCode={cliente.access_code} clienteNombre={cliente.nombre} telefono={cliente.telefono || undefined} />
+          <ClienteQR accessCode={cliente.access_code} clienteNombre={cliente.nombre} telefono={cliente.telefono || undefined} comercio={comercio!} />
           <button
             onClick={() => setShowQR(false)}
             className="mt-4 w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700"
