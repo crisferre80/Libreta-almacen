@@ -3,6 +3,7 @@ export interface Comercio {
   user_id: string;
   nombre_comercio: string;
   telefono: string | null;
+  alias: string | null;
   logo_url: string | null;
   avatar_url: string | null;
   portada_url: string | null;

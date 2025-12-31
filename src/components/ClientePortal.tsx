@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Calendar, LogIn, UserPlus, Eye, EyeOff, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { Cliente, Transaccion } from '../types';
+import { Cliente, Transaccion, Comercio } from '../types';
 import { formatDate } from '../lib/utils';
 import { User } from '@supabase/supabase-js';
 
@@ -10,6 +10,7 @@ export default function ClientePortal() {
   const { code } = useParams<{ code?: string }>();
   const [] = useState<User | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [comercio, setComercio] = useState<Comercio | null>(null);
   const [transacciones, setTransacciones] = useState<Transaccion[]>([]);
   const [] = useState(false);
   const [, setError] = useState('');
@@ -51,6 +52,20 @@ export default function ClientePortal() {
       }
 
       setCliente(clienteData);
+
+      // Load comercio
+      const { data: comercioData, error: comercioError } = await supabase
+        .from('comercios')
+        .select('*')
+        .eq('id', clienteData.comercio_id)
+        .single();
+
+      if (comercioError) {
+        console.error('Error loading comercio:', comercioError);
+      } else {
+        setComercio(comercioData);
+      }
+
       await cargarTransacciones(clienteData);
       setStep('view');
     } catch (err) {
@@ -321,6 +336,11 @@ export default function ClientePortal() {
               <CreditCard className="w-12 h-12 text-green-600 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-gray-900 mb-2">Pagar por Transferencia</h2>
               <p className="text-gray-600">Selecciona tu billetera virtual</p>
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800 font-medium">
+                  Comercio: {comercio?.alias || comercio?.nombre_comercio || 'Comercio'}
+                </p>
+              </div>
               <div className="mt-2 p-3 bg-green-50 rounded-lg">
                 <p className="text-sm text-green-800 font-medium">
                   Monto a pagar: ${cliente?.saldo_actual.toFixed(2)}

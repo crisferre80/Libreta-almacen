@@ -12,6 +12,7 @@ export default function ComercioPerfil({ onClose }: ComercioPerfilProps) {
   const { comercio } = useAuth();
   const [nombreComercio, setNombreComercio] = useState(comercio?.nombre_comercio || '');
   const [telefono, setTelefono] = useState(comercio?.telefono || '');
+  const [alias, setAlias] = useState(comercio?.alias || '');
   const [loading, setLoading] = useState(false);
 
   async function handleSave() {
@@ -24,6 +25,7 @@ export default function ComercioPerfil({ onClose }: ComercioPerfilProps) {
         .update({
           nombre_comercio: nombreComercio,
           telefono: telefono || null,
+          alias: alias || null,
         })
         .eq('id', comercio.id);
 
@@ -98,6 +100,19 @@ export default function ComercioPerfil({ onClose }: ComercioPerfilProps) {
               type="text"
               value={nombreComercio}
               onChange={(e) => setNombreComercio(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Alias del Comercio
+            </label>
+            <input
+              type="text"
+              value={alias}
+              onChange={(e) => setAlias(e.target.value)}
+              placeholder="Ej: Tienda Don Juan"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>

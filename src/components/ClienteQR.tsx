@@ -17,7 +17,8 @@ export default function ClienteQR({ accessCode, clienteNombre, telefono, comerci
       alert('No hay teléfono registrado para este cliente.');
       return;
     }
-    const mensaje = `Hola ${clienteNombre}, ${comercio.nombre_comercio} te invita a acceder a tu cuenta digital: ${url}. Contacto: ${comercio.telefono || 'Sin teléfono'}`;
+    const nombreMostrar = comercio.alias || comercio.nombre_comercio;
+    const mensaje = `Hola ${clienteNombre}, ${nombreMostrar} te invita a acceder a tu cuenta digital: ${url}. Contacto: ${comercio.telefono || 'Sin teléfono'}`;
     const whatsappUrl = `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, '_blank');
   };
